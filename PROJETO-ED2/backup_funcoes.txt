@@ -1,0 +1,58 @@
+void backspace(char *texto, Cursor *cursor)
+{
+    int tamanho = strlen(texto);
+    // Verifique se o cursor está dentro do texto e não no início
+    if (cursor->x > 0)
+    {
+        // Move todos os caracteres antes do cursor uma posição para a esquerda
+        for (int i = cursor->x - 1; i < tamanho; i++)
+        {
+            texto[i] = texto[i + 1];
+        }
+
+        // Atualize a posição do cursor x
+        (cursor->x)--;
+
+        // Atualize a tela com o novo texto
+        system("cls");
+        printf("%s", texto);
+
+        // Mantém o cursor na mesma coluna
+        gotoxy(cursor->x, cursor->y);
+    }
+    else if (cursor->y > 0)
+    {
+        // O cursor está no início da linha 0, verifique se há uma linha anterior
+        int tamanhoTexto = strlen(texto);
+        int posicaoAnterior = cursor->x;
+
+        // Retroceda até encontrar o início da linha anterior ou o início do texto
+        while (posicaoAnterior > 0 && texto[posicaoAnterior - 1] != '\n')
+        {
+            posicaoAnterior--;
+        }
+
+        // Verifique se encontrou uma linha anterior
+        if (posicaoAnterior > 0)
+        {
+            // Remova a quebra de linha ('\n') da linha atual
+            for (int i = cursor->x; i < tamanhoTexto; i++)
+            {
+                texto[i] = texto[i + 1];
+            }
+
+            // Atualize a posição do cursor x
+            (cursor->x)--;
+
+            // Atualize a posição do cursor y
+            (cursor->y)--;
+
+            // Atualize a tela com o novo texto
+            system("cls");
+            printf("%s", texto);
+
+            // Mantém o cursor na mesma coluna
+            gotoxy(cursor->x, cursor->y);
+        }
+    }
+}

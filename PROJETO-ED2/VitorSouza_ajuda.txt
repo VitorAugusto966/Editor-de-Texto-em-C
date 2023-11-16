@@ -1,0 +1,15 @@
+F1: Exibir um texto de ajuda.
+F2: Salvar as informações contidas na estrutura de dados em um arquivo do
+tipo texto.
+F10:Abrir arquivo e apresentar.
+F12: Exibir uma tela com as informações do aluno.
+ESC: Sair da aplicação.
+Setas: Navegação no texto.
+Insert:sobrescrever o texto anteriormente digitado onde o cursor 
+estiver posicionado.
+Page Up e Page Down:Page Up deve permitir trocar para a página acima e 
+Page Down permitir trocar para a página abaixo.
+Home e End: A tecla Home deve posicionar o cursor no início da linha ao 
+qual ele está posicionado e End ao final desta linha.
+Delete: Deve apagar o conteúdo onde o cursor está posicionado.
+Enter: Deve retornar o cursor ao início da próxima linha.
