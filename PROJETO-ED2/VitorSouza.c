@@ -4,75 +4,61 @@
 #include <conio.h>
 #include <windows.h>
 #include "vtrlib.c"
-
 #define MAX_TEXT_SIZE 10000 // Tamanho máximo do texto
 #define MAX_HELP_TEXT_SIZE 1000
 
-void inserirCaracter(char *texto, Cursor *cursor, char caracter)
-{
-    //printf("Cursor (x,y) = (%d, %d)", cursor->x, cursor->y);
-
+/// ta bugado
+void inserirCaracter(char *texto, Cursor *cursor, char caracter) {
     int tamanhoTexto = strlen(texto);
     int posicao;
 
-    /// Verifica se o tamanho atual do texto não excede o máximo
-    if (tamanhoTexto < MAX_TEXT_SIZE - 1)
-    {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 
-        if(cursor->y == 0)
-        {
-            for (int i = tamanhoTexto + 1; i > cursor->x; i--)
-            {
-                texto[i] = texto[i - 1];
+    int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+    // Verifica se o tamanho atual do texto não excede o máximo
+    if (tamanhoTexto < MAX_TEXT_SIZE - 1) {
+        // Calcula o número de colunas disponíveis na linha do cursor
+        int colunasNaLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
+
+        // Verifica se há espaço suficiente na linha para inserir um novo caractere
+        if (colunasNaLinha < columns - 1) {
+            // Continua com a lógica de inserção do caractere
+
+            if (cursor->y == 0) {
+                for (int i = tamanhoTexto + 1; i > cursor->x; i--) {
+                    texto[i] = texto[i - 1];
+                }
+                texto[cursor->x] = caracter;
+                (cursor->x)++;
+            } else {
+
+                posicao = contarCaracteresAteCursor(cursor, texto);
+               // printf("valor da posicao eh %d ", posicao);
+                for (int i = tamanhoTexto + 1; i > posicao; i--) {
+                    texto[i] = texto[i - 1];
+                }
+                texto[posicao] = caracter;
+                (cursor->x)++;
             }
 
-            /// Insere o caractere na posição do cursor
-            texto[cursor->x] = caracter;
+            // Atualiza o tamanho do texto após a inserção
+            tamanhoTexto = strlen(texto);
 
-            /// Incrementa a posição do cursor x
-            (cursor->x)++;
+            // Indicação de fim do texto
+            texto[tamanhoTexto + 1] = '\0';
 
+            // Atualiza a tela com o novo texto
+            system("cls");
+            printf("%s", texto);
+
+            // Mantém o cursor na mesma coluna
+            gotoxy(cursor->x, cursor->y);
+        } else {
+            // Exibe uma mensagem se não houver espaço suficiente na linha
+          //  printf("Não há espaço suficiente na linha para inserir um novo caractere.\n");
         }
-        else
-        {
-            //printf("Cursor (x,y) = (%d, %d)", cursor->x, cursor->y);
-            posicao = contarCaracteresAteCursor(cursor, texto);
-            // printf(" pos = %d", posicao);
-            for (int i = tamanhoTexto + 1; i > posicao; i--)
-            {
-                texto[i] = texto[i - 1];
-            }
-
-            /*  if(cursor->y > 1){
-
-              /// Insere o caractere na posição do cursor
-                   texto[posicao+1] = caracter;
-              }
-              else{
-
-              /// Insere o caractere na posição do cursor
-                           texto[posicao] = caracter;
-              }*/
-
-            /// Insere o caractere na posição do cursor
-            texto[posicao] = caracter;
-
-
-            /// Incrementa a posição do cursor x
-            (cursor->x)++;
-        }
-
-        tamanhoTexto = strlen(texto);
-        ///Indicação de fim do texto
-        texto[tamanhoTexto + 1] = '\0';
-
-        /// Atualize a tela com o novo texto
-        // system("cls");
-        //printf("%s", texto);
-
-        /// Mantém o cursor na mesma coluna
-        gotoxy(cursor->x, cursor->y);
-
     }
 }
 
@@ -240,6 +226,7 @@ void funcHome(Cursor *cursor, char *texto)
 {
     int posicao = cursor->x;
 
+
     /// Retroceda até encontrar o início da linha ou o início do texto
     while (posicao > 0 && texto[posicao - 1] != '\n')
     {
@@ -254,16 +241,17 @@ void funcHome(Cursor *cursor, char *texto)
 /// TECNICAMENTE CORRETO
 void funcEnd(Cursor *cursor, char *texto)
 {
-    int posicao = cursor->x;
-    int tamanhoTexto = strlen(texto);
+   // int posicao = cursor->x;
+    //int tamanhoTexto = strlen(texto);
+     int posicao = contarCaracteresNaLinhaDoCursor(cursor, texto);
 
     /// Avance até encontrar o final da linha ou o final do texto
-    while (posicao < tamanhoTexto && texto[posicao] != '\n')
+    /*while (posicao < tamanhoTexto && texto[posicao] != '\n')
     {
         posicao++;
-    }
+    }*/
 
-    cursor->x = posicao;
+    cursor->x = posicao+1;
     gotoxy(cursor->x, cursor->y);
 }
 
@@ -308,7 +296,7 @@ void teclaEnter(char *texto, Cursor *cursor)
     /// Atualize a tela com o novo texto
     system("cls");
     printf("%s", texto);
-    exibirTextoSalvo(texto);
+    //exibirTextoSalvo(texto);
     gotoxy(cursor->x, cursor->y);
 }
 
@@ -405,8 +393,6 @@ void main()
         if ((tecla >= 32 && tecla <= 126) && tecla != 75 && tecla != 77)
         {
             inserirCaracter(texto, &cursor, tecla);
-            system("cls");
-            printf("%s", texto);
         }
 
         switch (tecla)
