@@ -104,6 +104,7 @@ int contarQuebrasDeLinha(char *texto) {
     return contador;
 }
 
+/// Função que calcula a quantidade de caracteres na linha do cursor
 int calcularTamanhoTexto(Cursor *cursor, char *texto) {
     int tamanho = 0;
     int linhaAtual = 0; // Variável para acompanhar a linha atual
@@ -128,6 +129,26 @@ int calcularTamanhoTexto(Cursor *cursor, char *texto) {
     return tamanho;
 }
 
+/// Função que calcula a quantidade de caracteres até a linha do cursor
+int qtdCaracterAteCursor(Cursor *cursor, char *texto) {
+    int tamanho = 0;
+    int linhaAtual = 0; // Variável para acompanhar a linha atual
+    int i = 0;
+    int tamText = strlen(texto);
+
+    // Contar os caracteres até a linha do cursor
+    while (texto[i] != '\0' && linhaAtual < cursor->y) {
+        if (texto[i] == '\n') {
+            linhaAtual++;
+        }
+        tamanho++;
+        i++;
+    }
+
+    return tamanho + cursor->x;
+}
+
+
 int contarCaracteresAteCursor(Cursor *cursor, char *texto) {
     int contador = 0;
     int i = 0;
@@ -137,7 +158,7 @@ int contarCaracteresAteCursor(Cursor *cursor, char *texto) {
 
     /// Contar os caracteres nas linhas anteriores
     while( i <= cursor->y){
-        contador += calcularTamanhoTexto(&aux, texto);
+        contador += contarCaracteresNaLinhaDoCursor(&aux, texto);
         i++;
         aux.y = i;
     }

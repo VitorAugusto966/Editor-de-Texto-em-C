@@ -8,8 +8,10 @@
 #define MAX_HELP_TEXT_SIZE 1000
 
 /// ta bugado
-void inserirCaracter(char *texto, Cursor *cursor, char caracter) {
+void inserirCaracter(char *texto, Cursor *cursor, char caracter)
+{
     int tamanhoTexto = strlen(texto);
+    int tamanhoAnterior = strlen(texto);
     int posicao;
 
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -18,25 +20,32 @@ void inserirCaracter(char *texto, Cursor *cursor, char caracter) {
     int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
 
     // Verifica se o tamanho atual do texto não excede o máximo
-    if (tamanhoTexto < MAX_TEXT_SIZE - 1) {
+    if (tamanhoTexto < MAX_TEXT_SIZE - 1)
+    {
         // Calcula o número de colunas disponíveis na linha do cursor
-        int colunasNaLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
-
+        // int colunasNaLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
+        int colunasNaLinha = calcularTamanhoTexto(cursor, texto);
         // Verifica se há espaço suficiente na linha para inserir um novo caractere
-        if (colunasNaLinha < columns - 1) {
+        if (colunasNaLinha < columns - 1)
+        {
             // Continua com a lógica de inserção do caractere
 
-            if (cursor->y == 0) {
-                for (int i = tamanhoTexto + 1; i > cursor->x; i--) {
+            if (cursor->y == 0)
+            {
+                for (int i = tamanhoTexto + 1; i > cursor->x; i--)
+                {
                     texto[i] = texto[i - 1];
                 }
                 texto[cursor->x] = caracter;
                 (cursor->x)++;
-            } else {
+            }
+            else
+            {
 
-                posicao = contarCaracteresAteCursor(cursor, texto);
-               // printf("valor da posicao eh %d ", posicao);
-                for (int i = tamanhoTexto + 1; i > posicao; i--) {
+                posicao = qtdCaracterAteCursor(cursor, texto);
+                // printf("valor da posicao eh %d ", posicao);
+                for (int i = tamanhoTexto + 1; i > posicao; i--)
+                {
                     texto[i] = texto[i - 1];
                 }
                 texto[posicao] = caracter;
@@ -50,14 +59,23 @@ void inserirCaracter(char *texto, Cursor *cursor, char caracter) {
             texto[tamanhoTexto + 1] = '\0';
 
             // Atualiza a tela com o novo texto
-            system("cls");
-            printf("%s", texto);
+            //system("cls");
+
+            if(posicao== tamanhoTexto-1){
+                printf("%c",caracter);
+            }
+           else{
+              system("cls");
+              printf("%s", texto);
+           }
 
             // Mantém o cursor na mesma coluna
             gotoxy(cursor->x, cursor->y);
-        } else {
+        }
+        else
+        {
             // Exibe uma mensagem se não houver espaço suficiente na linha
-          //  printf("Não há espaço suficiente na linha para inserir um novo caractere.\n");
+            //  printf("Não há espaço suficiente na linha para inserir um novo caractere.\n");
         }
     }
 }
@@ -101,7 +119,7 @@ void moverCursorEsquerda(Cursor *cursor, char *texto)
     if (cursor->x > 0)
     {
         (cursor->x)--;
-       //a printf("Cursor (x,y) = (%d, %d)", cursor->x, cursor->y);
+        //a printf("Cursor (x,y) = (%d, %d)", cursor->x, cursor->y);
         gotoxy(cursor->x, cursor->y);
     }
     else if(cursor->x == 0 && cursor->y > 0)
@@ -144,13 +162,15 @@ void moverCursorDireita(Cursor *cursor, char *texto)
     // printf("texto = %d", tamanhoTexto);
     //printf("Cursor (x,y) = (%d, %d)", cursor->x, cursor->y);
 
-   if(cursor->x < tamanhoTexto &&cursor->y <= linhas){
-     cursor->x++;
-   }
-   else if(cursor->x == tamanhoTexto && cursor->y < linhas){
+    if(cursor->x < tamanhoTexto &&cursor->y <= linhas)
+    {
+        cursor->x++;
+    }
+    else if(cursor->x == tamanhoTexto && cursor->y < linhas)
+    {
         cursor->x = 0;
         cursor->y++;
-   }
+    }
 
     gotoxy(cursor->x, cursor->y);
 }
@@ -224,7 +244,7 @@ void rolarParaBaixo(Cursor *cursor, char *texto)
 /// TECNICAMENTE CORRETO
 void funcHome(Cursor *cursor, char *texto)
 {
-    int posicao = cursor->x;
+    /*int posicao = cursor->x;
 
 
     /// Retroceda até encontrar o início da linha ou o início do texto
@@ -233,7 +253,8 @@ void funcHome(Cursor *cursor, char *texto)
         posicao--;
     }
 
-    cursor->x = posicao;
+    cursor->x = posicao;*/
+    cursor->x = 0;
     gotoxy(cursor->x, cursor->y);
 }
 
@@ -241,9 +262,10 @@ void funcHome(Cursor *cursor, char *texto)
 /// TECNICAMENTE CORRETO
 void funcEnd(Cursor *cursor, char *texto)
 {
-   // int posicao = cursor->x;
+    // int posicao = cursor->x;
     //int tamanhoTexto = strlen(texto);
-     int posicao = contarCaracteresNaLinhaDoCursor(cursor, texto);
+    int posicao = contarCaracteresNaLinhaDoCursor(cursor,texto);
+    // int posicao = calcularTamanhoTexto(cursor, texto) - 1;
 
     /// Avance até encontrar o final da linha ou o final do texto
     /*while (posicao < tamanhoTexto && texto[posicao] != '\n')
@@ -380,83 +402,91 @@ void backspace(char *texto, Cursor *cursor)
     gotoxy(cursor->x, cursor->y);
 }
 
+void tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor)
+{
+    switch (tecla)
+    {
+    case 0:
+        // Verifique se é uma tecla especial (F1, F2, setas, etc.)
+        tecla = _getch(); // Obtenha o segundo caractere da sequência
+        switch (tecla)
+        {
+        case 59: // F1
+            exibirAjuda();
+            break;
+        case 60: // F2
+            salvarTexto(texto);
+            break;
+        case 68: // F10
+            exibirArquivoSalvo();
+            break;
+        case 82:
+            funcInsert(texto, cursor, tecla);
+            break;
+        }
+        break;
+    case 13: // Enter
+        teclaEnter(texto, cursor);
+        break;
+    case 27: // Esc
+        return; // Saia do programa
+    case -32:
+        tecla = _getch();
+        switch (tecla)
+        {
+        case 71: // Home
+            funcHome(cursor, texto);
+            break;
+        case 72: // Seta para cima
+            rolarParaCima(cursor, texto);
+            break;
+        case 80: // Seta para baixo
+            rolarParaBaixo(cursor, texto);
+            break;
+        case 79: // End
+            funcEnd(cursor, texto);
+            break;
+        case 75: // Seta para a esquerda
+            moverCursorEsquerda(cursor, texto);
+            break;
+        case 77: // Seta para a direita
+            moverCursorDireita(cursor, texto);
+            break;
+        case 83: // Delete
+            deletarCaracter(texto, cursor);
+            break;
+        case -122: // F12
+            exibirInformacoes();
+            break;
+        }
+        break;
+    case 8: // Backspace
+        backspace(texto, cursor);
+        break;
+    }
+}
 
 void main()
 {
     char tecla;
-    char texto[MAX_TEXT_SIZE]; /// Estrutura de dados para armazenar o texto
-    Cursor cursor = {0, 0}; /// Inicializa o cursor no ponto (0, 0)
+    char texto[MAX_TEXT_SIZE];
+    Cursor cursor = {0, 0};
     memset(texto, 0, sizeof(texto));
+
     while (1)
     {
         tecla = _getch();
+
+        // Verifica se é uma tecla de inserção
         if ((tecla >= 32 && tecla <= 126) && tecla != 75 && tecla != 77)
         {
             inserirCaracter(texto, &cursor, tecla);
         }
-
-        switch (tecla)
+        else
         {
-        case 0:
-            /// Verifique se é uma tecla especial (F1, F2, setas, etc.)
-            tecla = _getch(); /// Obtenha o segundo caractere da sequência
-            switch(tecla)
-            {
-            case 59: /// F1
-                exibirAjuda();
-                break;
-            case 60: /// F2
-                salvarTexto(texto);
-                break;
-            case 68: /// F10
-                exibirArquivoSalvo();
-                break;
-            case 82:
-                funcInsert(texto,&cursor,tecla);
-            }
-            break;
-        case 13: // Tecla Enter
-            teclaEnter(texto, &cursor);
-            break;
-
-        case 27: // Tecla Esc
-            return 0; // Saia do programa
-        case -32:
-            tecla = _getch();
-            switch(tecla)
-            {
-            case 71: // Home
-                funcHome(&cursor, texto);
-                break;
-            case 72: // Tecla de seta para cima (ASCII)
-                rolarParaCima(&cursor, texto);
-                break;
-
-            case 80: // Tecla de seta para baixo (ASCII)
-                rolarParaBaixo(&cursor, texto);
-                break;
-            case 79: // End
-                funcEnd(&cursor, texto);
-                break;
-            case 75:
-                moverCursorEsquerda(&cursor, texto);
-                break;
-            case 77: // Seta para a direita
-                moverCursorDireita(&cursor, texto);
-                break;
-            case 83: // Tecla Delete
-                deletarCaracter(texto, &cursor);
-                break;
-            case -122: ///f12
-                exibirInformacoes();
-                break;
-            }
-            break;
-
-        case 8: // Tecla Backspace
-            backspace(texto, &cursor);
-            break;
+            tratarCaracterEspecial(tecla, texto, &cursor);
         }
     }
-
 }
+
+
