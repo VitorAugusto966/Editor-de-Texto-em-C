@@ -7,10 +7,16 @@
 #define MAX_TEXT_SIZE 10000 // Tamanho máximo do texto
 #define MAX_HELP_TEXT_SIZE 1000
 
+
+///falta pgup e pgDown
+/// falta insert
+/// falta esc
+/// falta validar tamanho lateral do inserir
+
 /// ta bugado
 void inserirCaracter(char *texto, Cursor *cursor, char caracter)
 {
-    int tamanhoTexto = strlen(texto);
+    int tamanhoTexto = strlen(texto) + 1;
     int tamanhoAnterior = strlen(texto);
     int posicao;
 
@@ -28,8 +34,6 @@ void inserirCaracter(char *texto, Cursor *cursor, char caracter)
         // Verifica se há espaço suficiente na linha para inserir um novo caractere
         if (colunasNaLinha < columns - 1)
         {
-            // Continua com a lógica de inserção do caractere
-
             if (cursor->y == 0)
             {
                 for (int i = tamanhoTexto + 1; i > cursor->x; i--)
