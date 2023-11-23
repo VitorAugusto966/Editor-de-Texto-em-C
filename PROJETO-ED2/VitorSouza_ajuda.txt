@@ -1,3 +1,4 @@
+Letras, números e símbolos: Exibir na tela e inserção na estrutura
 F1: Solicitação de Ajuda
 F2: Salvar Conteúdo Atual
 F10: Abrir um Arquivo para Visualização
