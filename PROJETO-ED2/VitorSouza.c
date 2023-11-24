@@ -4,7 +4,7 @@
 #include <conio.h>
 #include <windows.h>
 #include "vtrlib.c"
-#define MAX_TEXT_SIZE 10000 // Tamanho máximo do texto
+#define MAX_TEXT_SIZE 100000 // Tamanho máximo do texto
 #define MAX_HELP_TEXT_SIZE 1000
 
 
@@ -65,13 +65,15 @@ void inserirCaracter(char *texto, Cursor *cursor, char caracter)
             // Atualiza a tela com o novo texto
             //system("cls");
 
-            if(posicao== tamanhoTexto-1){
+            if(posicao== tamanhoTexto-1)
+            {
                 printf("%c",caracter);
             }
-           else{
-              system("cls");
-              printf("%s", texto);
-           }
+            else
+            {
+                system("cls");
+                printf("%s", texto);
+            }
 
             // Mantém o cursor na mesma coluna
             gotoxy(cursor->x, cursor->y);
@@ -84,37 +86,20 @@ void inserirCaracter(char *texto, Cursor *cursor, char caracter)
     }
 }
 
-void funcInsert(char *texto, Cursor *cursor, char caracter)
+void funcInsert(char *texto, Cursor *cursor)
 {
-    int tamanhoTexto = strlen(texto);
     int posicao;
+    char tecla = _getch();
 
-    // Verifica se o tamanho atual do texto não excede o máximo
-    if (tamanhoTexto < MAX_TEXT_SIZE - 1)
-    {
-        // Verifica se o cursor está na primeira linha
-        if (cursor->y == 0)
-        {
-            // Se sim, sobrescreva o caractere na posição do cursor
-            texto[cursor->x] = caracter;
-        }
-        else
-        {
-            // Caso contrário, calcule a posição de inserção com base na posição do cursor
-            posicao = contarCaracteresAteCursor(cursor, texto);
+    posicao = qtdCaracterAteCursor(cursor, texto) ;
+    texto[posicao] = tecla;
+    system("cls");
+    printf("%s", texto);
 
-            // Sobrescreva o caractere na posição do cursor
-            texto[posicao] = caracter;
-        }
-
-        // Atualize a tela com o novo texto
-        system("cls");
-        printf("%s", texto);
-
-        // Mantém o cursor na mesma coluna
-        gotoxy(cursor->x, cursor->y);
-    }
+    // Mantém o cursor na mesma coluna
+    gotoxy(cursor->x, cursor->y);
 }
+
 
 void moverCursorEsquerda(Cursor *cursor, char *texto)
 {
@@ -424,9 +409,7 @@ void tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor)
         case 68: // F10
             exibirArquivoSalvo();
             break;
-        case 82:
-            funcInsert(texto, cursor, tecla);
-            break;
+
         }
         break;
     case 13: // Enter
@@ -456,6 +439,9 @@ void tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor)
         case 77: // Seta para a direita
             moverCursorDireita(cursor, texto);
             break;
+             case 82:
+            funcInsert(texto, cursor);
+            break;
         case 83: // Delete
             deletarCaracter(texto, cursor);
             break;
@@ -467,6 +453,7 @@ void tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor)
     case 8: // Backspace
         backspace(texto, cursor);
         break;
+
     }
 }
 
