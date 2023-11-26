@@ -96,11 +96,14 @@ void salvarTexto(char *texto)
 
 int contarQuebrasDeLinha(char *texto) {
     int contador = 0;
-    for (int i = 0; texto[i] != '\0'; i++) {
+    int tamanho = strlen(texto);
+    for (int i = 0; i < tamanho; i++) {
         if (texto[i] == '\n') {
             contador++;
         }
     }
+
+
     return contador;
 }
 
@@ -148,6 +151,27 @@ int qtdCaracterAteCursor(Cursor *cursor, char *texto) {
     return tamanho + cursor->x;
 }
 
+int contarCaracteresNaLinhaDoCursor(Cursor *cursor, char *texto) {
+    int contador = 0;
+    int i = 0;
+
+    // Encontrar a posição inicial da linha do cursor
+    int posicaoInicioLinha = 0;
+    while (i < cursor->y && texto[posicaoInicioLinha] != '\0') {
+        if (texto[posicaoInicioLinha] == '\n') {
+            i++;
+        }
+        posicaoInicioLinha++;
+    }
+
+    // Contar os caracteres na linha do cursor
+    while (texto[posicaoInicioLinha] != '\n' && texto[posicaoInicioLinha] != '\0') {
+        contador++;
+        posicaoInicioLinha++;
+    }
+
+    return contador;
+}
 
 int contarCaracteresAteCursor(Cursor *cursor, char *texto) {
     int contador = 0;
@@ -172,29 +196,6 @@ int contarCaracteresAteCursor(Cursor *cursor, char *texto) {
 
     return contador;
 }
-
-int contarCaracteresNaLinhaDoCursor(Cursor *cursor, char *texto) {
-    int contador = 0;
-    int i = 0;
-
-    // Encontrar a posição inicial da linha do cursor
-    int posicaoInicioLinha = 0;
-    while (i < cursor->y && texto[posicaoInicioLinha] != '\0') {
-        if (texto[posicaoInicioLinha] == '\n') {
-            i++;
-        }
-        posicaoInicioLinha++;
-    }
-
-    // Contar os caracteres na linha do cursor
-    while (texto[posicaoInicioLinha] != '\n' && texto[posicaoInicioLinha] != '\0') {
-        contador++;
-        posicaoInicioLinha++;
-    }
-
-    return contador;
-}
-
 
 
 void exibirTextoSalvo(char *texto) {
