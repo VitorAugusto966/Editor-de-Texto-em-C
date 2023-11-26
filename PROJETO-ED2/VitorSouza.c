@@ -20,10 +20,10 @@ void inserirCaracter(char *texto, Cursor *cursor, char caracter)
     int tamanhoAnterior = strlen(texto);
     int posicao;
 
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+  //  CONSOLE_SCREEN_BUFFER_INFO csbi;
+   // GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 
-    int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+   // int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
 
     // Verifica se o tamanho atual do texto não excede o máximo
     if (tamanhoTexto < MAX_TEXT_SIZE - 1)
@@ -32,7 +32,7 @@ void inserirCaracter(char *texto, Cursor *cursor, char caracter)
         // int colunasNaLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
         int colunasNaLinha = calcularTamanhoTexto(cursor, texto);
         // Verifica se há espaço suficiente na linha para inserir um novo caractere
-        if (colunasNaLinha < columns - 1)
+        if (colunasNaLinha < 80)
         {
             if (cursor->y == 0)
             {
@@ -80,8 +80,14 @@ void inserirCaracter(char *texto, Cursor *cursor, char caracter)
         }
         else
         {
-            // Exibe uma mensagem se não houver espaço suficiente na linha
-            //  printf("Não há espaço suficiente na linha para inserir um novo caractere.\n");
+            tamanhoTexto = strlen(texto);
+            cursor->y = cursor->y+1;
+            cursor->x = 0;
+            texto[tamanhoTexto] = '\n';
+            texto[tamanhoTexto+1] = caracter;
+            system("cls");
+            printf("%s", texto);
+            gotoxy(cursor->x, cursor->y);
         }
     }
 }
@@ -90,6 +96,8 @@ void inserirCaracter(char *texto, Cursor *cursor, char caracter)
 /// Protótipo da função tratarCaracterEspecial para a função insert reconhece-la
 /// Serve para resolver o erro de conflito de tipo
 int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op);
+//int tratarCaracterEspecial(char *texto, Cursor *cursor, int op);
+
 
 void funcInsert(char *texto, Cursor *cursor)
 {
@@ -116,6 +124,7 @@ void funcInsert(char *texto, Cursor *cursor)
              insert = 1;
             }*/
                 insert = tratarCaracterEspecial(tecla,texto,cursor,2);
+               //insert = tratarCaracterEspecial(texto,cursor,2);
         }
     }
 
@@ -417,10 +426,52 @@ void backspace(char *texto, Cursor *cursor)
 
 }
 
+void funcPgDown(Cursor *cursor, char *texto){
+    int qtd = contarQuebrasDeLinha(texto);
+    int tamanhoLinha;
+
+    if((cursor->y + 30) <= qtd){
+        cursor->y = qtd-1;
+        tamanhoLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
+        cursor->y = qtd - 1;
+        cursor->x = tamanhoLinha-1;
+        gotoxy(cursor->x, cursor->y);
+    }
+    else{
+        /*cursor->y+=30;
+        tamanhoLinha = contarCaracteresAteCursor(cursor, texto);
+        cursor->y+=30;
+        cursor->x = tamanhoLinha;
+        gotoxy(cursor->x, cursor->y);*/
+
+        if (cursor->y < qtd - 1) {
+            cursor->y += 30;
+        } else {
+            cursor->y = qtd - 1;
+        }
+        tamanhoLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
+        cursor->x = tamanhoLinha;
+        gotoxy(cursor->x, cursor->y);
+    }
+}
+
+void funcPgUp(Cursor *cursor, char *texto) {
+    // Verifica se o cursor já está acima de 30 linhas
+    if (cursor->y >= 30) {
+        cursor->y -= 30;
+    } else {
+        // Se o cursor estiver a menos de 30 linhas, vai para a linha 0
+        cursor->y = 0;
+    }
+
+    int tamanhoLinha = contarCaracteresAteCursor(cursor, texto);
+    cursor->x = tamanhoLinha;
+    gotoxy(cursor->x, cursor->y);
+}
+
 int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op)
 {
     int opc = 0;
-
     switch (tecla)
     {
     case 0:
@@ -455,8 +506,14 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op)
         case 72: // Seta para cima
             rolarParaCima(cursor, texto);
             break;
+        case 73:
+            funcPgUp(cursor,texto);
+            break;
         case 80: // Seta para baixo
             rolarParaBaixo(cursor, texto);
+            break;
+        case 81:
+            funcPgDown(cursor,texto);
             break;
         case 79: // End
             funcEnd(cursor, texto);
@@ -489,6 +546,55 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op)
     return opc;
 }
 
+/*int tratarCaracterEspecial(char *texto, Cursor *cursor, int op) {
+
+    int resultado = 0;
+
+    if (GetAsyncKeyState(VK_F1) & 0x8001) {
+        exibirAjuda();
+    } else if (GetAsyncKeyState(VK_F2) & 0x8001) {
+         salvarTexto(texto);
+    } else if (GetAsyncKeyState(VK_F10) & 0x8001) {
+            exibirArquivoSalvo();
+    } else if (GetAsyncKeyState(VK_LEFT) & 0x8001) {
+       moverCursorEsquerda(cursor, texto);
+    } else if (GetAsyncKeyState(VK_RIGHT) & 0x8001) {
+       moverCursorDireita(cursor, texto);
+    }
+    else if(GetAsyncKeyState(VK_UP)& 0x8001){
+
+    }
+    else if(GetAsyncKeyState(VK_DOWN)& 0x8001){
+
+    }
+    else if(GetAsyncKeyState(VK_HOME)& 0x8001){
+
+    }
+    else if(GetAsyncKeyState(VK_END)& 0x8001){
+
+    }
+    else if(GetAsyncKeyState(VK_RETURN)& 0x8001){
+        teclaEnter(texto, cursor);
+    }
+    else if (GetAsyncKeyState(VK_INSERT) & 0x8001 && op != 2) {
+        funcInsert(texto, cursor);
+        resultado = 1;
+    } else if (GetAsyncKeyState(VK_DELETE) & 0x8001) {
+        deletarCaracter(texto,cursor);
+    }
+    else if(GetAsyncKeyState(VK_BACK)){
+        backspace(texto,cursor);
+    }
+    else if(GetAsyncKeyState(VK_F12)& 0x8001){
+        exibirInformacoes();
+    }
+    else if(GetAsyncKeyState(VK_ESCAPE)& 0x8001)
+    {
+        resultado = 2;
+    }
+    return resultado;
+}*/
+
 
 void main()
 {
@@ -496,8 +602,7 @@ void main()
     char texto[MAX_TEXT_SIZE];
     Cursor cursor = {0, 0};
     memset(texto, 0, sizeof(texto));
-    int *sair  = 0;
-    int *insert  = 0;
+    int sair  = 0;
 
     while (sair != 2)
     {
@@ -510,7 +615,7 @@ void main()
         }
         else
         {
-            sair = tratarCaracterEspecial(tecla, texto, &cursor, 0);
+            sair = tratarCaracterEspecial(tecla,texto, &cursor, 0);
         }
     }
 }
