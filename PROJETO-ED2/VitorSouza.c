@@ -20,10 +20,10 @@ void inserirCaracter(char *texto, Cursor *cursor, char caracter)
     int tamanhoAnterior = strlen(texto);
     int posicao;
 
-  //  CONSOLE_SCREEN_BUFFER_INFO csbi;
-   // GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    //  CONSOLE_SCREEN_BUFFER_INFO csbi;
+    // GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 
-   // int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    // int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
 
     // Verifica se o tamanho atual do texto não excede o máximo
     if (tamanhoTexto < MAX_TEXT_SIZE - 1)
@@ -95,7 +95,7 @@ void inserirCaracter(char *texto, Cursor *cursor, char caracter)
 
 /// Protótipo da função tratarCaracterEspecial para a função insert reconhece-la
 /// Serve para resolver o erro de conflito de tipo
-int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op);
+int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int *teclaAnterior);
 //int tratarCaracterEspecial(char *texto, Cursor *cursor, int op);
 
 
@@ -103,6 +103,7 @@ void funcInsert(char *texto, Cursor *cursor)
 {
     int posicao;
     int insert = 0;
+    int *teclaAnterior = 0;
     char tecla;
 
 
@@ -123,8 +124,8 @@ void funcInsert(char *texto, Cursor *cursor)
              if(tecla == 82){
              insert = 1;
             }*/
-                insert = tratarCaracterEspecial(tecla,texto,cursor,2);
-               //insert = tratarCaracterEspecial(texto,cursor,2);
+            insert = tratarCaracterEspecial(tecla,texto,cursor,2, teclaAnterior);
+            //insert = tratarCaracterEspecial(texto,cursor,2);
         }
     }
 
@@ -426,27 +427,33 @@ void backspace(char *texto, Cursor *cursor)
 
 }
 
-void funcPgDown(Cursor *cursor, char *texto){
+void funcPgDown(Cursor *cursor, char *texto)
+{
     int qtd = contarQuebrasDeLinha(texto);
     int tamanhoLinha;
 
-    if((cursor->y + 30) <= qtd){
+    if((cursor->y + 30) <= qtd)
+    {
         cursor->y = qtd-1;
         tamanhoLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
         cursor->y = qtd - 1;
         cursor->x = tamanhoLinha-1;
         gotoxy(cursor->x, cursor->y);
     }
-    else{
+    else
+    {
         /*cursor->y+=30;
         tamanhoLinha = contarCaracteresAteCursor(cursor, texto);
         cursor->y+=30;
         cursor->x = tamanhoLinha;
         gotoxy(cursor->x, cursor->y);*/
 
-        if (cursor->y < qtd - 1) {
+        if (cursor->y < qtd - 1)
+        {
             cursor->y += 30;
-        } else {
+        }
+        else
+        {
             cursor->y = qtd - 1;
         }
         tamanhoLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
@@ -455,11 +462,15 @@ void funcPgDown(Cursor *cursor, char *texto){
     }
 }
 
-void funcPgUp(Cursor *cursor, char *texto) {
+void funcPgUp(Cursor *cursor, char *texto)
+{
     // Verifica se o cursor já está acima de 30 linhas
-    if (cursor->y >= 30) {
+    if (cursor->y >= 30)
+    {
         cursor->y -= 30;
-    } else {
+    }
+    else
+    {
         // Se o cursor estiver a menos de 30 linhas, vai para a linha 0
         cursor->y = 0;
     }
@@ -469,9 +480,10 @@ void funcPgUp(Cursor *cursor, char *texto) {
     gotoxy(cursor->x, cursor->y);
 }
 
-int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op)
+int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int *anterior)
 {
     int opc = 0;
+    int esc;
     switch (tecla)
     {
     case 0:
@@ -481,20 +493,47 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op)
         {
         case 59: // F1
             exibirAjuda();
+            *anterior = 1;
             break;
         case 60: // F2
             salvarTexto(texto);
+            *anterior = 0;
             break;
         case 68: // F10
             exibirArquivoSalvo();
+            *anterior = 0;
             break;
         }
         break;
     case 13: // Enter
         teclaEnter(texto, cursor);
+        *anterior = 0;
         break;
     case 27: // Esc
-        opc = 2; // Retorna 2 quando a tecla Esc é pressionada
+        if(*anterior == 1)
+        {
+            system("cls");
+            printf("%s", texto);
+        }
+        else
+        {
+
+
+            do
+            {
+                printf("\nDeseja salvar o texto antes de sair da aplicação? (1/Sim, 2/Não): ");
+                scanf("%d", &esc);
+            }
+            while (esc != 1 && esc != 2);
+
+            if(esc == 1)
+            {
+                salvarTexto(texto);
+            }
+            opc = 2;
+
+
+        }
         break;
     case -32:
         tecla = _getch();
@@ -502,45 +541,57 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op)
         {
         case 71: // Home
             funcHome(cursor, texto);
+            *anterior = 0;
             break;
         case 72: // Seta para cima
             rolarParaCima(cursor, texto);
+            *anterior = 0;
             break;
         case 73:
             funcPgUp(cursor,texto);
+            *anterior = 0;
             break;
         case 80: // Seta para baixo
             rolarParaBaixo(cursor, texto);
+            *anterior = 0;
             break;
         case 81:
             funcPgDown(cursor,texto);
+            *anterior = 0;
             break;
         case 79: // End
             funcEnd(cursor, texto);
+            *anterior = 0;
             break;
         case 75: // Seta para a esquerda
             moverCursorEsquerda(cursor, texto);
+            *anterior = 0;
             break;
         case 77: // Seta para a direita
             moverCursorDireita(cursor, texto);
+            *anterior = 0;
             break;
         case 82:
             if (op != 2)
             {
                 funcInsert(texto, cursor);
             }
-             opc = 1; // Retorna 1 quando a tecla de inserção é pressionada
+            *anterior = 0;
+            opc = 1; // Retorna 1 quando a tecla de inserção é pressionada
             break;
         case 83: // Delete
             deletarCaracter(texto, cursor);
+            *anterior = 0;
             break;
         case -122: // F12
             exibirInformacoes();
+            *anterior = 1;
             break;
         }
         break;
     case 8: // Backspace
         backspace(texto, cursor);
+        *anterior = 0;
         break;
     }
     return opc;
@@ -603,6 +654,7 @@ void main()
     Cursor cursor = {0, 0};
     memset(texto, 0, sizeof(texto));
     int sair  = 0;
+    int teclaAnterior = 0;
 
     while (sair != 2)
     {
@@ -615,7 +667,7 @@ void main()
         }
         else
         {
-            sair = tratarCaracterEspecial(tecla,texto, &cursor, 0);
+            sair = tratarCaracterEspecial(tecla,texto, &cursor, 0, &teclaAnterior);
         }
     }
 }
