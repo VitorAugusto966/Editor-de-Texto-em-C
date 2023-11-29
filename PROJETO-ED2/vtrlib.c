@@ -1,22 +1,25 @@
-#define MAX_TEXT_SIZE 100000 // Tamanho máximo do texto
-#define MAX_HELP_TEXT_SIZE 1000 // Tamanho máximo do texto de ajuda
+///Arquivo para salvar funções auxiliares e de leitura ou de salvamento de arquivo.
+
+#define MAX_TEXT_SIZE 300000 /// Tamanho máximo do texto
+#define MAX_HELP_TEXT_SIZE 1000 /// Tamanho máximo do texto de ajuda
 
 /// Estrutura para armazenar a posição X e Y do cursor
 typedef struct
 {
-    int x;
-    int y;
+    int x; /// representa a coluna
+    int y; /// representa a linha
 } Cursor;
 
+/// Função para mover o cursor para a posição (x, y) na tela de execução
 void gotoxy(int x, int y)
 {
-    /// Função para mover o cursor para a posição (x, y) na tela de execução
     COORD coord;
     coord.X = x;
     coord.Y = y;
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
+///Função ao pressionar a tecla f1
 void exibirAjuda()
 {
     system("cls"); /// Limpa a tela
@@ -36,6 +39,7 @@ void exibirAjuda()
     fclose(arquivoAjuda);
 }
 
+///Função da tecla F12
 void exibirInformacoes()
 {
     system("cls"); /// Limpa a tela
@@ -57,7 +61,7 @@ void exibirInformacoes()
 
 }
 
-/// Exibir arquivo salvo no txt - F10
+/// Exibir arquivo salvo no arquivo .txt - F10
 void exibirArquivoSalvo()
 {
     system("cls"); /// Limpa a tela
@@ -93,7 +97,7 @@ void salvarTexto(char *texto)
     fclose(arquivo);
 }
 
-
+///Função auxiliar que calcula a quantidade de linhas do texto
 int contarQuebrasDeLinha(char *texto) {
     int contador = 0;
     int tamanho = strlen(texto);
@@ -110,7 +114,7 @@ int contarQuebrasDeLinha(char *texto) {
 /// Função que calcula a quantidade de caracteres na linha do cursor
 int calcularTamanhoTexto(Cursor *cursor, char *texto) {
     int tamanho = 0;
-    int linhaAtual = 0; // Variável para acompanhar a linha atual
+    int linhaAtual = 0; /// Variável para acompanhar a linha atual
     int i = 0;
     int tamText = strlen(texto);
 
@@ -121,13 +125,11 @@ int calcularTamanhoTexto(Cursor *cursor, char *texto) {
         i++;
     }
 
-    // Contar os caracteres na linha atual até a posição do cursor
+    /// Contar os caracteres na linha atual até a posição do cursor
     while (texto[i] != '\n' && texto[i] != '\0') {
         tamanho++;
         i++;
     }
-
-    //tamanho+=1;
 
     return tamanho;
 }
@@ -135,11 +137,11 @@ int calcularTamanhoTexto(Cursor *cursor, char *texto) {
 /// Função que calcula a quantidade de caracteres até a linha do cursor
 int qtdCaracterAteCursor(Cursor *cursor, char *texto) {
     int tamanho = 0;
-    int linhaAtual = 0; // Variável para acompanhar a linha atual
+    int linhaAtual = 0; /// Variável para acompanhar a linha atual
     int i = 0;
     int tamText = strlen(texto);
 
-    // Contar os caracteres até a linha do cursor
+    /// Contar os caracteres até a linha do cursor
     while (texto[i] != '\0' && linhaAtual < cursor->y) {
         if (texto[i] == '\n') {
             linhaAtual++;
@@ -151,11 +153,12 @@ int qtdCaracterAteCursor(Cursor *cursor, char *texto) {
     return tamanho + cursor->x;
 }
 
+///Função auxiliar para os caracteres na linha do cursor
 int contarCaracteresNaLinhaDoCursor(Cursor *cursor, char *texto) {
     int contador = 0;
     int i = 0;
 
-    // Encontrar a posição inicial da linha do cursor
+    /// Encontrar a posição inicial da linha do cursor
     int posicaoInicioLinha = 0;
     while (i < cursor->y && texto[posicaoInicioLinha] != '\0') {
         if (texto[posicaoInicioLinha] == '\n') {
@@ -164,7 +167,7 @@ int contarCaracteresNaLinhaDoCursor(Cursor *cursor, char *texto) {
         posicaoInicioLinha++;
     }
 
-    // Contar os caracteres na linha do cursor
+    /// Contar os caracteres na linha do cursor
     while (texto[posicaoInicioLinha] != '\n' && texto[posicaoInicioLinha] != '\0') {
         contador++;
         posicaoInicioLinha++;
@@ -173,6 +176,7 @@ int contarCaracteresNaLinhaDoCursor(Cursor *cursor, char *texto) {
     return contador;
 }
 
+///Função auxiliar que irá contar a quantidade de caracteres do inicio até a posição cursor
 int contarCaracteresAteCursor(Cursor *cursor, char *texto) {
     int contador = 0;
     int i = 0;
@@ -187,25 +191,12 @@ int contarCaracteresAteCursor(Cursor *cursor, char *texto) {
         aux.y = i;
     }
 
-    //contador+=1;
     /// Incrementa no contador a quantidade de linhas do texto
     contador+= cursor->y;
-
-    ///verificar contador+= aux.y;
-   // printf("Contador esta em =  %d ", contador);
 
     return contador;
 }
 
 
-void exibirTextoSalvo(char *texto) {
-    int tamanhoTexto = strlen(texto);
-
-    printf("\n\n");
-    for (int i = 0; i < tamanhoTexto; i++) {
-        // Use i para mostrar a posição e texto[i] para mostrar o caractere
-        printf("Posição %d: %c\n", i, texto[i]);
-    }
-}
 
 
