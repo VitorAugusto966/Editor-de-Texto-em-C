@@ -424,6 +424,7 @@ void funcPgDown(Cursor *cursor, char *texto)
     int qtd = contarQuebrasDeLinha(texto);
     int tamanhoLinha;
 
+    //printf("%d", qtd);
     /// Se a linha atual + 30 que é o valor esticamente definido para o tamanho de cada página
     /// for menor ou igual a quantidade de linhas no texto
     if((cursor->y + 30) <= qtd)
@@ -436,7 +437,13 @@ void funcPgDown(Cursor *cursor, char *texto)
 
         ///atualiza novamente o cursor y e o cursor x
         cursor->y = qtd - 1;
-        cursor->x = tamanhoLinha-1;
+
+        ///Atualize o cursor x caso contenha mais caracteres que a linha anterior
+        if(cursor->x > tamanhoLinha)
+        {
+            ///Atualiza o cursor x
+            cursor->x = tamanhoLinha;
+        }
 
         ///Atualiza o cursor na tela
         gotoxy(cursor->x, cursor->y);
@@ -446,22 +453,11 @@ void funcPgDown(Cursor *cursor, char *texto)
     else
     {
         ///Caso o cursor y for menor que a quantidade de linhas
-        if (cursor->y < qtd - 1)
-        {
-            ///Incrementa em 30 o cursor y
-            cursor->y += 30;
-        }
-
-        ///Caso não dê para avançar para próxima página, ele irá para a ultima linha do texto
-        else
-        {
-            cursor->y = qtd - 1;
-        }
+        cursor->y = qtd;
 
         ///chama a função para saber quantos caracter tem na linha para poder atualizar o cursor x
         tamanhoLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
-        ///Atualiza o cursor x
-        cursor->x = tamanhoLinha;
+
 
         ///Atualiza o cursor na tela
         gotoxy(cursor->x, cursor->y);
@@ -484,7 +480,12 @@ void funcPgUp(Cursor *cursor, char *texto)
 
     ///Conta quantos caracteres tem naquela linha do cursor e atualiza o cursor x
     int tamanhoLinha = contarCaracteresAteCursor(cursor, texto);
-    cursor->x = tamanhoLinha;
+
+    ///Atualize o cursor x caso contenha mais caracteres que a linha anterior
+    if(cursor->x > tamanhoLinha)
+    {
+        cursor->x = tamanhoLinha;
+    }
 
     ///Atualiza o cursor na tela
     gotoxy(cursor->x, cursor->y);
@@ -539,7 +540,7 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
                 scanf("%d", &esc);
             }
             while (esc != 1 && esc != 2); /// while para verificar e validar se o usuário digitou 1 ou 2
-                                          /// caso não digite, o white se repete
+            /// caso não digite, o white se repete
 
             ///Se ele desejar salvar o texto irá chamar a função para salvar o texto
             if(esc == 1)
