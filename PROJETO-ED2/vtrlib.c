@@ -62,26 +62,39 @@ void exibirInformacoes()
 }
 
 /// Exibir arquivo salvo no arquivo .txt - F10
-void exibirArquivoSalvo()
+void exibirArquivoSalvo(char *texto)
 {
-    system("cls"); /// Limpa a tela
+    system("cls"); // Limpa a tela
+
     FILE *arquivoInfo = fopen("VitorSouza_texto.txt", "r");
+
     if (arquivoInfo == NULL)
     {
-        printf("Erro ao abrir o arquivo de informacoes.\n");
+        perror("Erro ao abrir o arquivo de informacoes");
         return;
     }
 
-    char linha[MAX_HELP_TEXT_SIZE];
+    if(strlen(texto) > 0){
+         memset(texto, 0, MAX_TEXT_SIZE);
+    }
+
+    char linha[MAX_TEXT_SIZE];
 
     while (fgets(linha, sizeof(linha), arquivoInfo) != NULL)
     {
-        printf("%s", linha);
+        /// Verifica se há espaço suficiente no buffer antes de concatenar
+        if ((strlen(texto) + strlen(linha)) < MAX_TEXT_SIZE - 1)
+        {
+            /// Concatena a linha ao texto existente
+            strcat(texto, linha);
+        }
     }
 
-    fclose(arquivoInfo);
+    printf("%s", texto);
 
+    fclose(arquivoInfo);
 }
+
 
 /// Função para salvar o conteudo do vetor texto em um arquivo
 void salvarTexto(char *texto)
