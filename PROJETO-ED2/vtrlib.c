@@ -62,12 +62,10 @@ void exibirInformacoes()
 }
 
 /// Exibir arquivo salvo no arquivo .txt - F10
-void exibirArquivoSalvo(char *texto)
+void exibirArquivoSalvo(char *texto, Cursor *cursor)
 {
-    system("cls"); // Limpa a tela
-
     FILE *arquivoInfo = fopen("VitorSouza_texto.txt", "r");
-
+    system("cls"); // Limpa a tela
     if (arquivoInfo == NULL)
     {
         perror("Erro ao abrir o arquivo de informacoes");
@@ -75,7 +73,8 @@ void exibirArquivoSalvo(char *texto)
     }
 
     if(strlen(texto) > 0){
-         memset(texto, 0, MAX_TEXT_SIZE);
+        // memset(texto, 0, MAX_TEXT_SIZE);
+        strcpy(texto, "");
     }
 
     char linha[MAX_TEXT_SIZE];
@@ -86,12 +85,14 @@ void exibirArquivoSalvo(char *texto)
         if ((strlen(texto) + strlen(linha)) < MAX_TEXT_SIZE - 1)
         {
             /// Concatena a linha ao texto existente
-            strcat(texto, linha);
+           strcat(texto, linha);
         }
     }
 
+    cursor->x = 0;
+    cursor->y = 0;
     printf("%s", texto);
-
+    gotoxy(cursor->x, cursor->y);
     fclose(arquivoInfo);
 }
 

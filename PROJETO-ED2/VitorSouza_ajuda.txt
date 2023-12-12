@@ -1,13 +1,13 @@
-Letras, números e símbolos: Exibir na tela e inserção na estrutura
-F1: Solicitação de Ajuda
-F2: Salvar Conteúdo Atual
-F10: Abrir um Arquivo para Visualização
-F12: Visualizar Informações do Aluno
-ESC: Encerrar Aplicação
+Letras, numeros e simbolos: Exibir na tela e insercao na estrutura
+F1: Solicitacao de Ajuda
+F2: Salvar Conteudo Atual
+F10: Abrir um Arquivo para Visualizacao
+F12: Visualizar Informacoes do Aluno
+ESC: Encerrar Aplicacao
 Setas: Navegar pelo Texto
 Insert: Sobrescrever Texto no Cursor Atual
-Page Up:Page Up permite avançar para a página acima
-Page Down:Page Down permite avançar para a página abaixo
-Home e End: Home posiciona o cursor no início da linha atual, e End o posiciona no final da linha
-Delete: Apagar Conteúdo no Cursor Atual
-Enter: Mover o Cursor para o Início da Próxima Linha
+Page Up:Page Up permite avancar para a pagina acima
+Page Down:Page Down permite avancar para a pagina abaixo
+Home e End: Home posiciona o cursor no inicio da linha atual, e End o posiciona no final da linha
+Delete: Apagar Conteudo no Cursor Atual
+Enter: Mover o Cursor para o Inicio da Proxima Linha

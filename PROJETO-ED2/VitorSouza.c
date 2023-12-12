@@ -290,29 +290,10 @@ void funcEnd(Cursor *cursor, char *texto)
 /// TECNICAMENTE CORRETO
 void teclaEnter(char *texto, Cursor *cursor)
 {
-    int tamanhoTexto = strlen(texto);
-    int y = cursor->y; ///salvar a posição Y do cursor antes da varredura
-
-    /// Encontre a posição do cursor->y-1 no texto
-    int posicaoQuebraAnterior = -1;
-    for (int i = 0; i < tamanhoTexto; i++)
-    {
-        if (texto[i] == '\n')
-        {
-            posicaoQuebraAnterior = i;
-            if (cursor->y == 0)
-            {
-                break; /// Se cursor->y for 0, não é necessário continuar procurando
-            }
-            cursor->y--;
-        }
-    }
-
-    /// Calcule a posição para inserir a quebra de linha com base em cursor->x
-    int posicaoInsercao = posicaoQuebraAnterior + cursor->x + 1;
+    int posicaoInsercao = qtdCaracterAteCursor(cursor, texto);
 
     /// Desloca o texto subsequente uma posição para frente
-    for (int i = tamanhoTexto; i >= posicaoInsercao; i--)
+    for (int i = strlen(texto); i >= posicaoInsercao; i--)
     {
         texto[i + 1] = texto[i];
     }
@@ -321,7 +302,6 @@ void teclaEnter(char *texto, Cursor *cursor)
     texto[posicaoInsercao] = '\n';
 
     /// Atualize o cursor para a nova linha
-    cursor->y = y;
     cursor->y++;
     cursor->x = 0;
 
@@ -329,7 +309,7 @@ void teclaEnter(char *texto, Cursor *cursor)
     system("cls");
     printf("%s", texto);
 
-    ///Atualiza o cursor para posição correta
+    /// Atualiza o cursor para posição correta
     gotoxy(cursor->x, cursor->y);
 }
 
@@ -511,17 +491,15 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
             break;
         case 60: // F2
             salvarTexto(texto);
-            *anterior = 0;
             break;
         case 68: // F10
-            exibirArquivoSalvo(texto);
-            *anterior = 0;
+            exibirArquivoSalvo(texto, cursor);
             break;
         }
         break;
     case 13: // Enter
         teclaEnter(texto, cursor);
-        *anterior = 0;
+        //*anterior = 0;
         break;
     case 27: // Esc
 
@@ -537,10 +515,27 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
             ///Ao pressionar esc pergunta se o usuario quer salvar ou não o texto
             do
             {
+                system("cls");
                 printf("\nDeseja salvar o texto antes de sair da aplicação? (1/Sim, 2/Não): ");
-                scanf("%d", &esc);
+
+                char input[256];  // Defina um tamanho seguro para a entrada
+                if (fgets(input, sizeof(input), stdin) != NULL)
+                {
+                    if (sscanf(input, "%d", &esc) != 1)
+                    {
+                        // A conversão para int falhou
+                        esc = -1;  // Defina um valor que indique erro
+                    }
+                }
+                else
+                {
+                    // Erro ao ler a entrada
+                    esc = -1;  // Defina um valor que indique erro
+                }
+
             }
-            while (esc != 1 && esc != 2); /// while para verificar e validar se o usuário digitou 1 ou 2
+            while (esc != 1 && esc != 2);
+
             /// caso não digite, o white se repete
 
             ///Se ele desejar salvar o texto irá chamar a função para salvar o texto
@@ -549,8 +544,6 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
                 salvarTexto(texto);
             }
             opc = 2;
-
-
         }
         break;
     case -32:
@@ -559,57 +552,46 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
         {
         case 71: // Home
             funcHome(cursor, texto);
-            *anterior = 0;
             break;
         case 72: // Seta para cima
             rolarParaCima(cursor, texto);
-            *anterior = 0;
             break;
         case 73:
             funcPgUp(cursor,texto);
-            *anterior = 0;
             break;
         case 80: // Seta para baixo
             rolarParaBaixo(cursor, texto);
-            *anterior = 0;
             break;
         case 81:
             funcPgDown(cursor,texto);
-            *anterior = 0;
             break;
         case 79: // End
             funcEnd(cursor, texto);
-            *anterior = 0;
             break;
         case 75: // Seta para a esquerda
             moverCursorEsquerda(cursor, texto);
-            *anterior = 0;
             break;
         case 77: // Seta para a direita
             moverCursorDireita(cursor, texto);
-            *anterior = 0;
             break;
         case 82:
             if (op != 2)
             {
                 funcInsert(texto, cursor);
             }
-            *anterior = 0;
             opc = 1; /// Retorna 1 quando a tecla de inserção é pressionada
             break;
         case 83: // Delete
             deletarCaracter(texto, cursor);
-            *anterior = 0;
             break;
         case -122: // F12
             exibirInformacoes();
-            *anterior = 1;
+             *anterior = 1;
             break;
         }
         break;
     case 8: // Backspace
         backspace(texto, cursor);
-        *anterior = 0;
         break;
     }
     return opc;
