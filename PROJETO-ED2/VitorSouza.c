@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <conio.h>
+#include <string.h>
 #include <windows.h>
 #include "vtrlib.c"
 #define MAX_TEXT_SIZE 30000 /// Tamanho máximo do texto
@@ -513,7 +514,7 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
             *anterior = 0;
             break;
         case 68: // F10
-            exibirArquivoSalvo();
+            exibirArquivoSalvo(texto);
             *anterior = 0;
             break;
         }
@@ -594,7 +595,7 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
                 funcInsert(texto, cursor);
             }
             *anterior = 0;
-            opc = 1; // Retorna 1 quando a tecla de inserção é pressionada
+            opc = 1; /// Retorna 1 quando a tecla de inserção é pressionada
             break;
         case 83: // Delete
             deletarCaracter(texto, cursor);
@@ -616,6 +617,8 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
 
 void main()
 {
+    SetConsoleTitle("Editor de texto");
+
     char tecla;
     char texto[MAX_TEXT_SIZE];
     Cursor cursor = {0, 0};
