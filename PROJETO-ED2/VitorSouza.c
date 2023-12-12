@@ -281,7 +281,7 @@ void funcEnd(Cursor *cursor, char *texto)
     int posicao = contarCaracteresNaLinhaDoCursor(cursor,texto);
 
     ///cursor recebe a quantidade de caracteres na linha + 1 para poder ir pro fim da linha;
-    cursor->x = posicao+1;
+    cursor->x = posicao;
 
     ///Atualiza o cursor para a posição
     gotoxy(cursor->x, cursor->y);
@@ -317,86 +317,91 @@ void teclaEnter(char *texto, Cursor *cursor)
 void deletarCaracter(char *texto, Cursor *cursor)
 {
     int tamanhoTexto = strlen(texto);
+    int x = cursor->x;
     int y = cursor->y;
+    int posicao = qtdCaracterAteCursor(cursor, texto);
+    int tamanhoLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
 
-    /// Encontre a posição do cursor->y-1 no texto
-    int posicaoQuebraAnterior = -1;
-    for (int i = 0; i < tamanhoTexto; i++)
+    if (tamanhoTexto > 0 && posicao > 0)
     {
-        if (texto[i] == '\n')
+        cursor->x = x;
+        cursor->y = y;
+
+        if (texto[posicao] == '\n' && tamanhoLinha == 0)
         {
-            posicaoQuebraAnterior = i;
-            if (cursor->y == 0)
-            {
-                break; /// Se cursor->y for 0, não é necessário continuar procurando
-            }
-            cursor->y--;
+            cursor->y = y - 1;
+            tamanhoLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
+            cursor->x = tamanhoLinha;
+            cursor->y = y - 1;
         }
-    }
-
-    /// Calcule a posição
-    int posicaoRemocao = posicaoQuebraAnterior + cursor->x+1;
-
-    /// Move todos os caracteres após a posição de remoção uma posição para trás
-    for (int i = posicaoRemocao; i < tamanhoTexto; i++)
-    {
-        texto[i] = texto[i + 1];
-    }
-
-    /// Atualize a tela com o novo texto
-    cursor->y = y;
-    system("cls");
-    printf("%s", texto);
-
-    /// Atualiza o cursor na tela
-    gotoxy(cursor->x, cursor->y);
-}
-
-
-
-void backspace(char *texto, Cursor *cursor)
-{
-    int tamanhoTexto = strlen(texto);
-    int y = cursor->y;
-
-    /// Encontre a posição do cursor->y-1 no texto
-    int posicaoQuebraAnterior = -1;
-
-    if(tamanhoTexto > 0)
-    {
-        for (int i = 0; i < tamanhoTexto; i++)
+        else
         {
-            if (texto[i] == '\n')
-            {
-                posicaoQuebraAnterior = i;
-                if (cursor->y == 0)
-                {
-                    break; /// Se cursor->y for 0, não é necessário continuar procurando
-                }
-                cursor->y--;
-            }
+            cursor->y = y;
+            cursor->x--;
         }
-
-        /// Calcule a posição para remoção
-        int posicaoRemocao = posicaoQuebraAnterior + cursor->x;
 
         /// Move todos os caracteres após a posição de remoção uma posição para trás
-        for (int i = posicaoRemocao; i < tamanhoTexto; i++)
+        for (int i = posicao; i < tamanhoTexto; i++)
         {
             texto[i] = texto[i + 1];
         }
 
         /// Atualize a tela com o novo texto
-        cursor->y = y;
-        cursor->x = cursor->x-1;
         system("cls");
         printf("%s", texto);
 
         /// Atualiza o cursor na tela
         gotoxy(cursor->x, cursor->y);
     }
-
 }
+
+
+
+
+void backspace(char *texto, Cursor *cursor)
+{
+    int tamanhoTexto = strlen(texto);
+    int x = cursor->x;
+    int y = cursor->y;
+    int posicao = qtdCaracterAteCursor(cursor, texto);
+    int tamanhoLinha = 0;
+
+    if (tamanhoTexto > 0 && posicao > 0)
+    {
+        cursor->x = x;
+        cursor->y = y;
+
+        /// Verifica se o caractere a ser removido é um '\n' e se a linha tem tamanho zero
+        tamanhoLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
+        //printf("\n qtd = %d", tamanhoLinha);
+
+        if (texto[posicao - 1] == '\n' && tamanhoLinha == 0)
+        {
+            cursor->y = y - 1;
+            tamanhoLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
+            cursor->x = tamanhoLinha;
+            cursor->y = y - 1;
+        }
+        else{
+            cursor->y = y;
+            cursor->x--;
+        }
+
+        /// Move todos os caracteres após a posição de remoção uma posição para trás
+        for (int i = posicao - 1; i < tamanhoTexto; i++)
+        {
+            texto[i] = texto[i + 1];
+        }
+
+        /// Atualize a tela com o novo texto
+        system("cls");
+        printf("%s", texto);
+        /// Atualiza o cursor na tela
+        gotoxy(cursor->x, cursor->y);
+    }
+}
+
+
 
 ///Função PgDown, descer a página
 void funcPgDown(Cursor *cursor, char *texto)
@@ -499,7 +504,7 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
         break;
     case 13: // Enter
         teclaEnter(texto, cursor);
-        //*anterior = 0;
+        anterior = 0;
         break;
     case 27: // Esc
 
@@ -516,7 +521,8 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
             do
             {
                 system("cls");
-                printf("\nDeseja salvar o texto antes de sair da aplicação? (1/Sim, 2/Não): ");
+                printf("%s", texto);
+                printf("\n\nDeseja salvar o texto antes de sair da aplicação? (1/Sim, 2/Não): ");
 
                 char input[256];  // Defina um tamanho seguro para a entrada
                 if (fgets(input, sizeof(input), stdin) != NULL)
@@ -542,6 +548,7 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
             if(esc == 1)
             {
                 salvarTexto(texto);
+                printf("\nTexto salvo com sucesso!");
             }
             opc = 2;
         }
@@ -552,37 +559,47 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
         {
         case 71: // Home
             funcHome(cursor, texto);
+            *anterior = 0;
             break;
         case 72: // Seta para cima
             rolarParaCima(cursor, texto);
+            *anterior = 0;
             break;
         case 73:
             funcPgUp(cursor,texto);
+            *anterior = 0;
             break;
         case 80: // Seta para baixo
             rolarParaBaixo(cursor, texto);
+            *anterior = 0;
             break;
         case 81:
             funcPgDown(cursor,texto);
+            *anterior = 0;
             break;
         case 79: // End
             funcEnd(cursor, texto);
+            *anterior = 0;
             break;
         case 75: // Seta para a esquerda
             moverCursorEsquerda(cursor, texto);
+            *anterior = 0;
             break;
         case 77: // Seta para a direita
             moverCursorDireita(cursor, texto);
+            *anterior = 0;
             break;
         case 82:
             if (op != 2)
             {
                 funcInsert(texto, cursor);
             }
+            *anterior = 0;
             opc = 1; /// Retorna 1 quando a tecla de inserção é pressionada
             break;
         case 83: // Delete
             deletarCaracter(texto, cursor);
+            *anterior = 0;
             break;
         case -122: // F12
             exibirInformacoes();
@@ -592,6 +609,7 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
         break;
     case 8: // Backspace
         backspace(texto, cursor);
+         *anterior = 0;
         break;
     }
     return opc;
