@@ -73,8 +73,8 @@ void exibirArquivoSalvo(char *texto, Cursor *cursor)
     }
 
     if(strlen(texto) > 0){
-        // memset(texto, 0, MAX_TEXT_SIZE);
-        strcpy(texto, "");
+        memset(texto, 0, sizeof(texto));
+       // strcpy(texto, "");
     }
 
     char linha[MAX_TEXT_SIZE];
