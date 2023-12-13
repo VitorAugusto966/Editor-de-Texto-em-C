@@ -1,6 +1,6 @@
 ///Arquivo para salvar funções auxiliares e de leitura ou de salvamento de arquivo.
 
-#define MAX_TEXT_SIZE 300000 /// Tamanho máximo do texto
+#define MAX_TEXT_SIZE 50000 /// Tamanho máximo do texto
 #define MAX_HELP_TEXT_SIZE 1000 /// Tamanho máximo do texto de ajuda
 
 /// Estrutura para armazenar a posição X e Y do cursor
