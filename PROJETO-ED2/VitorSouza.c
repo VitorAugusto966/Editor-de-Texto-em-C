@@ -5,7 +5,7 @@
 #include <string.h>
 #include <windows.h>
 #include "vtrlib.c"
-#define MAX_TEXT_SIZE 30000 /// Tamanho máximo do texto
+#define MAX_TEXT_SIZE 50000 /// Tamanho máximo do texto
 #define MAX_HELP_TEXT_SIZE 1000
 
 
@@ -119,7 +119,7 @@ void funcInsert(char *texto, Cursor *cursor)
         ///Caso seja uma tecla especial irá chamar a função que trata os caracteres especiais
         else
         {
-            insert = tratarCaracterEspecial(tecla,texto,cursor,2, teclaAnterior);
+            insert = tratarCaracterEspecial(tecla,texto,cursor,2, &teclaAnterior);
         }
     }
 
@@ -496,9 +496,11 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
             break;
         case 60: // F2
             salvarTexto(texto);
+            *anterior = 0;
             break;
         case 68: // F10
             exibirArquivoSalvo(texto, cursor);
+            *anterior = 0;
             break;
         }
         break;
@@ -513,6 +515,7 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
         {
             system("cls");
             printf("%s", texto);
+            gotoxy(cursor->x, cursor->y);
         }
         /// Se não chama a função de  verificação de salvamento
         else

@@ -1,4 +1,4 @@
-Prontuário: PE3007049
+Prontuario: PE3007049
 Nome: Vitor Augusto de Souza Rego
-Curso: Bacharelado em Ciência da Computação.
+Curso: Bacharelado em Ciencia da Computacao
 Ano de ingresso: 2020
