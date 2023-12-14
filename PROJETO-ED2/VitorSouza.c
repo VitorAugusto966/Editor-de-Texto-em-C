@@ -364,6 +364,7 @@ void backspace(char *texto, Cursor *cursor)
     int x = cursor->x;
     int y = cursor->y;
     int posicao = qtdCaracterAteCursor(cursor, texto);
+    int linhaAnterior;
     int tamanhoLinha = 0;
 
     if (tamanhoTexto > 0 && posicao > 0)
@@ -373,7 +374,6 @@ void backspace(char *texto, Cursor *cursor)
 
         /// Verifica se o caractere a ser removido é um '\n' e se a linha tem tamanho zero
         tamanhoLinha = contarCaracteresNaLinhaDoCursor(cursor, texto);
-        //printf("\n qtd = %d", tamanhoLinha);
 
         if (texto[posicao - 1] == '\n' && tamanhoLinha == 0)
         {
@@ -382,7 +382,8 @@ void backspace(char *texto, Cursor *cursor)
             cursor->x = tamanhoLinha;
             cursor->y = y - 1;
         }
-        else{
+        else
+        {
             cursor->y = y;
             cursor->x--;
         }
@@ -390,7 +391,7 @@ void backspace(char *texto, Cursor *cursor)
         /// Move todos os caracteres após a posição de remoção uma posição para trás
         for (int i = posicao - 1; i < tamanhoTexto; i++)
         {
-            texto[i] = texto[i + 1];
+                texto[i] = texto[i + 1];
         }
 
         /// Atualize a tela com o novo texto
@@ -606,13 +607,13 @@ int tratarCaracterEspecial(char tecla, char *texto, Cursor *cursor, int op, int 
             break;
         case -122: // F12
             exibirInformacoes();
-             *anterior = 1;
+            *anterior = 1;
             break;
         }
         break;
     case 8: // Backspace
         backspace(texto, cursor);
-         *anterior = 0;
+        *anterior = 0;
         break;
     }
     return opc;
